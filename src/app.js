@@ -1,41 +1,24 @@
-const Vue = require('vue')
-const Koa = require('koa');
-const app = new Koa();
-const Router = require('koa-better-router');
-const router = Router().loadMethods();
-const renderer = require('vue-server-renderer').createRenderer({
-  template: require('fs').readFileSync('./index.template.html', 'utf-8')
-});
+// app.js
+import Vue from 'vue'
+import App from './App.vue'
+import { createRouter } from './router'
+import { createStore } from './store'
+import { sync } from 'vuex-router-sync'
 
-router.get('*', (ctx, next) => {
-
+// 导出一个工厂函数，用于创建新的
+// 应用程序、router 和 store 实例
+export function createApp () {
+  // 创建 router 和 store 实例
+  const router = createRouter()
+  const store = createStore()
+  // 同步路由状态(route state)到 store
+  sync(store, router)
+  // 创建应用程序实例，将 router 和 store 注入
   const app = new Vue({
-    data: {
-      url: ctx.request.url
-    },
-    template: `<div>访问的 URL 是： {{ url }}</div>`
+    router,
+    store,
+    // 根实例简单的渲染应用程序组件。
+    render: h => h(App)
   })
-
-  const context = {
-    title: 'hello222',
-    meta: `
-      <meta ...>
-      <meta ...>
-    `
-  }
-
-  renderer.renderToString(app, context, (err, html) => {
-    if (err) {
-      return ctx.body = 'Internal Server Error'
-    }
-    return ctx.body = html
-    
-  })   
-
-});
-
-app.use(router.middleware());
-
-app.listen(3000, () => {
-  console.log('Listening at 3000...')
-});
+  return { app, router, store }
+}
