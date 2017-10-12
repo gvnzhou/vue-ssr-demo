@@ -1,7 +1,7 @@
 const Vue = require('vue')
 const server = require('express')()
 
-const serverBundle = require('/path/to/built-server-bundle.js')
+const serverBundle = require('/dist/vue-ssr-server-bundle.json')
 
 const { createBundleRenderer } = require('vue-server-renderer')
 const renderer = createBundleRenderer(serverBundle, {
